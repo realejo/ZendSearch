@@ -68,17 +68,17 @@ class Xlsx extends AbstractOpenXML
      */
     private function __construct($fileName, $storeContent)
     {
-        if (!class_exists('ZipArchive', false)) {
+        if (! class_exists('ZipArchive', false)) {
             throw new ExtensionNotLoadedException(
                 'MS Office documents processing functionality requires Zip extension to be loaded'
             );
         }
 
         // Document data holders
-        $sharedStrings = array();
-        $worksheets = array();
-        $documentBody = array();
-        $coreProperties = array();
+        $sharedStrings = [];
+        $worksheets = [];
+        $documentBody = [];
+        $coreProperties = [];
 
         // Open AbstractOpenXML package
         $package = new \ZipArchive();
@@ -101,13 +101,13 @@ class Xlsx extends AbstractOpenXML
         foreach ($relations->Relationship as $rel) {
             if ($rel["Type"] == AbstractOpenXML::SCHEMA_OFFICEDOCUMENT) {
                 // Found office document! Read relations for workbook...
-                $workbookRelations = simplexml_load_string($package->getFromName( $this->absoluteZipPath(dirname($rel["Target"]) . "/_rels/" . basename($rel["Target"]) . ".rels")) );
+                $workbookRelations = simplexml_load_string($package->getFromName($this->absoluteZipPath(dirname($rel["Target"]) . "/_rels/" . basename($rel["Target"]) . ".rels")));
                 $workbookRelations->registerXPathNamespace("rel", AbstractOpenXML::SCHEMA_RELATIONSHIP);
 
                 // Read shared strings
                 $sharedStringsPath = $workbookRelations->xpath("rel:Relationship[@Type='" . self::SCHEMA_SHAREDSTRINGS . "']");
                 $sharedStringsPath = (string)$sharedStringsPath[0]['Target'];
-                $xmlStrings = simplexml_load_string($package->getFromName( $this->absoluteZipPath(dirname($rel["Target"]) . "/" . $sharedStringsPath)) );
+                $xmlStrings = simplexml_load_string($package->getFromName($this->absoluteZipPath(dirname($rel["Target"]) . "/" . $sharedStringsPath)));
                 if (isset($xmlStrings) && isset($xmlStrings->si)) {
                     foreach ($xmlStrings->si as $val) {
                         if (isset($val->t)) {
@@ -121,8 +121,8 @@ class Xlsx extends AbstractOpenXML
                 // Loop relations for workbook and extract worksheets...
                 foreach ($workbookRelations->Relationship as $workbookRelation) {
                     if ($workbookRelation["Type"] == self::SCHEMA_WORKSHEETRELATION) {
-                        $worksheets[ str_replace( 'rId', '', (string)$workbookRelation["Id"]) ] = simplexml_load_string(
-                            $package->getFromName( $this->absoluteZipPath(dirname($rel["Target"]) . "/" . dirname($workbookRelation["Target"]) . "/" . basename($workbookRelation["Target"])) )
+                        $worksheets[ str_replace('rId', '', (string)$workbookRelation["Id"]) ] = simplexml_load_string(
+                            $package->getFromName($this->absoluteZipPath(dirname($rel["Target"]) . "/" . dirname($workbookRelation["Target"]) . "/" . basename($workbookRelation["Target"])))
                         );
                     }
                 }
@@ -186,9 +186,13 @@ class Xlsx extends AbstractOpenXML
 
                             // Check for numeric values
                             if (is_numeric($value) && $dataType != 's') {
-                                if ($value == (int)$value) $value = (int)$value;
-                                elseif ($value == (float)$value) $value = (float)$value;
-                                elseif ($value == (double)$value) $value = (double)$value;
+                                if ($value == (int)$value) {
+                                    $value = (int)$value;
+                                } elseif ($value == (float)$value) {
+                                    $value = (float)$value;
+                                } elseif ($value == (double)$value) {
+                                    $value = (double)$value;
+                                }
                             }
                     }
 
@@ -219,7 +223,7 @@ class Xlsx extends AbstractOpenXML
         }
 
         // Store title (if not present in meta data)
-        if (!isset($coreProperties['title'])) {
+        if (! isset($coreProperties['title'])) {
             $this->addField(Field::Text('title', $fileName, 'UTF-8'));
         }
     }
@@ -232,7 +236,7 @@ class Xlsx extends AbstractOpenXML
      */
     private function _parseRichText($is = null)
     {
-        $value = array();
+        $value = [];
 
         if (isset($is->t)) {
             $value[] = (string)$is->t;

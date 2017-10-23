@@ -34,7 +34,7 @@ abstract class AbstractSimilarity
      *
      * @var array
      */
-    private static $_normTable = array( 0   => 0.0,
+    private static $_normTable = [ 0   => 0.0,
                                         1   => 5.820766E-10,
                                         2   => 6.9849193E-10,
                                         3   => 8.1490725E-10,
@@ -289,7 +289,7 @@ abstract class AbstractSimilarity
                                         252 => 4.2949673E9,
                                         253 => 5.3687091E9,
                                         254 => 6.4424509E9,
-                                        255 => 7.5161928E9 );
+                                        255 => 7.5161928E9 ];
 
 
     /**
@@ -312,7 +312,7 @@ abstract class AbstractSimilarity
      */
     public static function getDefault()
     {
-        if (!self::$_defaultImpl instanceof AbstractSimilarity) {
+        if (! self::$_defaultImpl instanceof AbstractSimilarity) {
             self::$_defaultImpl = new DefaultSimilarity();
         }
 
@@ -391,7 +391,7 @@ abstract class AbstractSimilarity
      */
     public static function encodeNorm($f)
     {
-      return self::_floatToByte($f);
+        return self::_floatToByte($f);
     }
 
     /**
@@ -416,9 +416,9 @@ abstract class AbstractSimilarity
             $delta = $f - self::$_normTable[$mid];
 
             if ($delta < 0) {
-                $highIndex = $mid-1;
+                $highIndex = $mid - 1;
             } elseif ($delta > 0) {
-                $lowIndex  = $mid+1;
+                $lowIndex  = $mid + 1;
             } else {
                 return $mid; // We got it!
             }
@@ -426,7 +426,7 @@ abstract class AbstractSimilarity
 
         // round to closest value
         if ($highIndex != 255 &&
-            $f - self::$_normTable[$highIndex] > self::$_normTable[$highIndex+1] - $f ) {
+            $f - self::$_normTable[$highIndex] > self::$_normTable[$highIndex + 1] - $f ) {
             return $highIndex + 1;
         } else {
             return $highIndex;
@@ -488,7 +488,7 @@ abstract class AbstractSimilarity
      */
     public function idf($input, \ZendSearch\Lucene\SearchIndexInterface $reader)
     {
-        if (!is_array($input)) {
+        if (! is_array($input)) {
             return $this->idfFreq($reader->docFreq($input), $reader->count());
         } else {
             $idf = 0.0;

@@ -128,13 +128,15 @@ class Phrase extends AbstractPreprocessing
             if (Lucene\Lucene::getDefaultSearchField() === null) {
                 $searchFields = $index->getFieldNames(true);
             } else {
-                $searchFields = array(Lucene\Lucene::getDefaultSearchField());
+                $searchFields = [Lucene\Lucene::getDefaultSearchField()];
             }
 
             foreach ($searchFields as $fieldName) {
-                $subquery = new Phrase($this->_phrase,
-                                       $this->_phraseEncoding,
-                                       $fieldName);
+                $subquery = new Phrase(
+                    $this->_phrase,
+                    $this->_phraseEncoding,
+                    $fieldName
+                );
                 $subquery->setSlop($this->getSlop());
 
                 $query->addSubquery($subquery->rewrite($index));
@@ -160,7 +162,7 @@ class Phrase extends AbstractPreprocessing
         $tokens = Analyzer::getDefault()->tokenize($this->_phrase, $this->_phraseEncoding);
 
         if (count($tokens) == 0) {
-            $this->_matches = array();
+            $this->_matches = [];
             return new Query\Insignificant();
         }
 
@@ -214,7 +216,7 @@ class Phrase extends AbstractPreprocessing
         }
 
         //It's non-trivial phrase query
-        $words = array();
+        $words = [];
         foreach ($tokens as $token) {
             $words[] = $token->getTermText();
         }

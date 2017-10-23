@@ -46,7 +46,7 @@ class Term
      */
     public function __construct($text, $field = null)
     {
-        $this->field = ($field === null)?  Lucene\Lucene::getDefaultSearchField() : $field;
+        $this->field = ($field === null) ? Lucene\Lucene::getDefaultSearchField() : $field;
         $this->text  = $text;
     }
 
@@ -79,9 +79,9 @@ class Term
             $charBytes = 1;
             if ((ord($str[$prefixBytes]) & 0xC0) == 0xC0) {
                 $charBytes++;
-                if (ord($str[$prefixBytes]) & 0x20 ) {
+                if (ord($str[$prefixBytes]) & 0x20) {
                     $charBytes++;
-                    if (ord($str[$prefixBytes]) & 0x10 ) {
+                    if (ord($str[$prefixBytes]) & 0x10) {
                         $charBytes++;
                     }
                 }
@@ -113,9 +113,9 @@ class Term
             $charBytes = 1;
             if ((ord($str[$bytes]) & 0xC0) == 0xC0) {
                 $charBytes++;
-                if (ord($str[$bytes]) & 0x20 ) {
+                if (ord($str[$bytes]) & 0x20) {
                     $charBytes++;
-                    if (ord($str[$bytes]) & 0x10 ) {
+                    if (ord($str[$bytes]) & 0x10) {
                         $charBytes++;
                     }
                 }

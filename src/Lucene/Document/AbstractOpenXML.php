@@ -65,7 +65,7 @@ abstract class AbstractOpenXML extends Document
     protected function extractMetaData(\ZipArchive $package)
     {
         // Data holders
-        $coreProperties = array();
+        $coreProperties = [];
 
         // Prevent php from loading remote resources
         $loadEntities = libxml_disable_entity_loader(true);
@@ -106,11 +106,13 @@ abstract class AbstractOpenXML extends Document
      */
     protected function absoluteZipPath($path)
     {
-        $path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
         $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
-        $absolutes = array();
+        $absolutes = [];
         foreach ($parts as $part) {
-            if ('.' == $part) continue;
+            if ('.' == $part) {
+                continue;
+            }
             if ('..' == $part) {
                 array_pop($absolutes);
             } else {

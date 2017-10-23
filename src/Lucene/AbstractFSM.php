@@ -29,7 +29,7 @@ abstract class AbstractFSM
      *
      * @var array
      */
-    private $_states = array();
+    private $_states = [];
 
     /**
      * Current state
@@ -43,7 +43,7 @@ abstract class AbstractFSM
      *
      * @var array
      */
-    private $_inputAphabet = array();
+    private $_inputAphabet = [];
 
     /**
      * State transition table
@@ -52,7 +52,7 @@ abstract class AbstractFSM
      *
      * @var array
      */
-    private $_rules = array();
+    private $_rules = [];
 
     /**
      * List of entry actions
@@ -62,7 +62,7 @@ abstract class AbstractFSM
      *
      * @var array
      */
-    private $_entryActions =  array();
+    private $_entryActions = [];
 
     /**
      * List of exit actions
@@ -72,7 +72,7 @@ abstract class AbstractFSM
      *
      * @var array
      */
-    private $_exitActions =  array();
+    private $_exitActions = [];
 
     /**
      * List of input actions
@@ -82,7 +82,7 @@ abstract class AbstractFSM
      *
      * @var array
      */
-    private $_inputActions =  array();
+    private $_inputActions = [];
 
     /**
      * List of input actions
@@ -92,7 +92,7 @@ abstract class AbstractFSM
      *
      * @var array
      */
-    private $_transitionActions =  array();
+    private $_transitionActions = [];
 
     /**
      * Finite State machine constructor
@@ -120,7 +120,7 @@ abstract class AbstractFSM
      * @param array $inputAphabet
      * @param array $rules
      */
-    public function __construct($states = array(), $inputAphabet = array(), $rules = array())
+    public function __construct($states = [], $inputAphabet = [], $rules = [])
     {
         $this->addStates($states);
         $this->addInputSymbols($inputAphabet);
@@ -162,7 +162,7 @@ abstract class AbstractFSM
      */
     public function setState($state)
     {
-        if (!isset($this->_states[$state])) {
+        if (! isset($this->_states[$state])) {
             throw new Exception\InvalidArgumentException('State \'' . $state . '\' is not on of the possible FSM states.');
         }
 
@@ -217,7 +217,7 @@ abstract class AbstractFSM
     public function addRules($rules)
     {
         foreach ($rules as $rule) {
-            $this->addrule($rule[0], $rule[1], $rule[2], isset($rule[3])?$rule[3]:null);
+            $this->addrule($rule[0], $rule[1], $rule[2], isset($rule[3]) ? $rule[3] : null);
         }
     }
 
@@ -233,18 +233,18 @@ abstract class AbstractFSM
      */
     public function addRule($sourceState, $input, $targetState, $inputAction = null)
     {
-        if (!isset($this->_states[$sourceState])) {
+        if (! isset($this->_states[$sourceState])) {
             throw new Exception\InvalidArgumentException('Undefined source state (' . $sourceState . ').');
         }
-        if (!isset($this->_states[$targetState])) {
+        if (! isset($this->_states[$targetState])) {
             throw new Exception\InvalidArgumentException('Undefined target state (' . $targetState . ').');
         }
-        if (!isset($this->_inputAphabet[$input])) {
+        if (! isset($this->_inputAphabet[$input])) {
             throw new Exception\InvalidArgumentException('Undefined input symbol (' . $input . ').');
         }
 
-        if (!isset($this->_rules[$sourceState])) {
-            $this->_rules[$sourceState] = array();
+        if (! isset($this->_rules[$sourceState])) {
+            $this->_rules[$sourceState] = [];
         }
         if (isset($this->_rules[$sourceState][$input])) {
             throw new Exception\RuntimeException('Rule for {state,input} pair (' . $sourceState . ', '. $input . ') is already defined.');
@@ -270,12 +270,12 @@ abstract class AbstractFSM
      */
     public function addEntryAction($state, FSMAction $action)
     {
-        if (!isset($this->_states[$state])) {
+        if (! isset($this->_states[$state])) {
             throw new Exception\InvalidArgumentException('Undefined state (' . $state. ').');
         }
 
-        if (!isset($this->_entryActions[$state])) {
-            $this->_entryActions[$state] = array();
+        if (! isset($this->_entryActions[$state])) {
+            $this->_entryActions[$state] = [];
         }
 
         $this->_entryActions[$state][] = $action;
@@ -292,12 +292,12 @@ abstract class AbstractFSM
      */
     public function addExitAction($state, FSMAction $action)
     {
-        if (!isset($this->_states[$state])) {
+        if (! isset($this->_states[$state])) {
             throw new Exception\InvalidArgumentException('Undefined state (' . $state. ').');
         }
 
-        if (!isset($this->_exitActions[$state])) {
-            $this->_exitActions[$state] = array();
+        if (! isset($this->_exitActions[$state])) {
+            $this->_exitActions[$state] = [];
         }
 
         $this->_exitActions[$state][] = $action;
@@ -315,18 +315,18 @@ abstract class AbstractFSM
      */
     public function addInputAction($state, $inputSymbol, FSMAction $action)
     {
-        if (!isset($this->_states[$state])) {
+        if (! isset($this->_states[$state])) {
             throw new Exception\InvalidArgumentException('Undefined state (' . $state. ').');
         }
-        if (!isset($this->_inputAphabet[$inputSymbol])) {
+        if (! isset($this->_inputAphabet[$inputSymbol])) {
             throw new Exception\InvalidArgumentException('Undefined input symbol (' . $inputSymbol. ').');
         }
 
-        if (!isset($this->_inputActions[$state])) {
-            $this->_inputActions[$state] = array();
+        if (! isset($this->_inputActions[$state])) {
+            $this->_inputActions[$state] = [];
         }
-        if (!isset($this->_inputActions[$state][$inputSymbol])) {
-            $this->_inputActions[$state][$inputSymbol] = array();
+        if (! isset($this->_inputActions[$state][$inputSymbol])) {
+            $this->_inputActions[$state][$inputSymbol] = [];
         }
 
         $this->_inputActions[$state][$inputSymbol][] = $action;
@@ -344,18 +344,18 @@ abstract class AbstractFSM
      */
     public function addTransitionAction($sourceState, $targetState, FSMAction $action)
     {
-        if (!isset($this->_states[$sourceState])) {
+        if (! isset($this->_states[$sourceState])) {
             throw new Exception\InvalidArgumentException('Undefined source state (' . $sourceState. ').');
         }
-        if (!isset($this->_states[$targetState])) {
+        if (! isset($this->_states[$targetState])) {
             throw new Exception\InvalidArgumentException('Undefined source state (' . $targetState. ').');
         }
 
-        if (!isset($this->_transitionActions[$sourceState])) {
-            $this->_transitionActions[$sourceState] = array();
+        if (! isset($this->_transitionActions[$sourceState])) {
+            $this->_transitionActions[$sourceState] = [];
         }
-        if (!isset($this->_transitionActions[$sourceState][$targetState])) {
-            $this->_transitionActions[$sourceState][$targetState] = array();
+        if (! isset($this->_transitionActions[$sourceState][$targetState])) {
+            $this->_transitionActions[$sourceState][$targetState] = [];
         }
 
         $this->_transitionActions[$sourceState][$targetState][] = $action;
@@ -371,10 +371,10 @@ abstract class AbstractFSM
      */
     public function process($input)
     {
-        if (!isset($this->_rules[$this->_currentState])) {
+        if (! isset($this->_rules[$this->_currentState])) {
             throw new Exception\RuntimeException('There is no any rule for current state (' . $this->_currentState . ').');
         }
-        if (!isset($this->_rules[$this->_currentState][$input])) {
+        if (! isset($this->_rules[$this->_currentState][$input])) {
             throw new Exception\InvalidArgumentException('There is no any rule for {current state, input} pair (' . $this->_currentState . ', ' . $input . ').');
         }
 

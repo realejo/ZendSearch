@@ -38,7 +38,7 @@ class StopWords implements TokenFilterInterface
      *
      * @param array $stopwords array (set) of words that will be filtered out
      */
-    public function __construct($stopwords = array())
+    public function __construct($stopwords = [])
     {
         $this->_stopSet = array_flip($stopwords);
     }
@@ -77,13 +77,13 @@ class StopWords implements TokenFilterInterface
         if (! $fd) {
             throw new RuntimeException('Cannot open file ' . $filepath);
         }
-        while (!feof ($fd)) {
+        while (! feof($fd)) {
             $buffer = trim(fgets($fd));
             if (strlen($buffer) > 0 && $buffer[0] != '#') {
                 $this->_stopSet[$buffer] = 1;
             }
         }
-        if (!fclose($fd)) {
+        if (! fclose($fd)) {
             throw new RuntimeException('Cannot close file ' . $filepath);
         }
     }

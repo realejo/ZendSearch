@@ -51,7 +51,7 @@ class QueryToken
      */
     public static function getTypes()
     {
-        return array(   self::TT_WORD,
+        return [   self::TT_WORD,
                         self::TT_PHRASE,
                         self::TT_FIELD,
                         self::TT_FIELD_INDICATOR,
@@ -70,7 +70,7 @@ class QueryToken
                         self::TT_NOT_LEXEME,
                         self::TT_TO_LEXEME,
                         self::TT_NUMBER
-                     );
+                     ];
     }
 
 
@@ -120,7 +120,7 @@ class QueryToken
 
         switch ($tokenCategory) {
             case self::TC_WORD:
-                if (  strtolower($tokenText) == 'and') {
+                if (strtolower($tokenText) == 'and') {
                     $this->type = self::TT_AND_LEXEME;
                 } elseif (strtolower($tokenText) == 'or') {
                     $this->type = self::TT_OR_LEXEME;

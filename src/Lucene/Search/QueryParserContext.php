@@ -68,7 +68,7 @@ class QueryParserContext
      *
      * @var array
      */
-    private $_signs = array();
+    private $_signs = [];
 
     /**
      * Query entries
@@ -77,7 +77,7 @@ class QueryParserContext
      *
      * @var array
      */
-    private $_entries = array();
+    private $_entries = [];
 
     /**
      * Query string encoding
@@ -107,7 +107,7 @@ class QueryParserContext
      */
     public function getField()
     {
-        return ($this->_nextEntryField !== null)  ?  $this->_nextEntryField : $this->_defaultField;
+        return ($this->_nextEntryField !== null) ? $this->_nextEntryField : $this->_defaultField;
     }
 
     /**
@@ -178,7 +178,7 @@ class QueryParserContext
 
         $lastEntry = array_pop($this->_entries);
 
-        if (!$lastEntry instanceof QueryEntry\AbstractQueryEntry) {
+        if (! $lastEntry instanceof QueryEntry\AbstractQueryEntry) {
             // there are no entries or last entry is boolean operator
             throw new QueryParserException('\'~\' modifier must follow word or phrase.');
         }
@@ -203,7 +203,7 @@ class QueryParserContext
 
         $lastEntry = array_pop($this->_entries);
 
-        if (!$lastEntry instanceof QueryEntry\AbstractQueryEntry) {
+        if (! $lastEntry instanceof QueryEntry\AbstractQueryEntry) {
             // there are no entries or last entry is boolean operator
             throw new QueryParserException('\'^\' modifier must follow word, phrase or subquery.');
         }
@@ -248,7 +248,7 @@ class QueryParserContext
         }
 
         foreach ($this->_entries as $entryId => $entry) {
-            $sign = ($this->_signs[$entryId] !== null) ?  $this->_signs[$entryId] : $defaultSign;
+            $sign = ($this->_signs[$entryId] !== null) ? $this->_signs[$entryId] : $defaultSign;
             $query->addSubquery($entry->getQuery($this->_encoding), $sign);
         }
 
@@ -318,14 +318,14 @@ class QueryParserContext
                 }
             }
 
-            if (!$nonNegativeEntryFound) {
+            if (! $nonNegativeEntryFound) {
                 unset($conjuctions[$conjuctionId]);
             }
         }
 
 
-        $subqueries = array();
-        foreach ($conjuctions as  $conjuction) {
+        $subqueries = [];
+        foreach ($conjuctions as $conjuction) {
             // Check, if it's a one term conjuction
             if (count($conjuction) == 1) {
                 $subqueries[] = $conjuction[0][0]->getQuery($this->_encoding);

@@ -41,7 +41,7 @@ class SegmentMerger
      *
      * @var array|\ZendSearch\Lucene\Index\SegmentInfo
      */
-    private $_segmentInfos = array();
+    private $_segmentInfos = [];
 
     /**
      * Flag to signal, that merge is already done
@@ -56,7 +56,7 @@ class SegmentMerger
      *
      * @var array
      */
-    private $_fieldsMap = array();
+    private $_fieldsMap = [];
 
 
 
@@ -143,7 +143,7 @@ class SegmentMerger
                         $norm    = '';
                         $docs    = $segmentInfo->count();
                         for ($count = 0; $count < $docs; $count++) {
-                            if (!$segmentInfo->isDeleted($count)) {
+                            if (! $segmentInfo->isDeleted($count)) {
                                 $norm .= $srcNorm[$count];
                             }
                         }
@@ -168,34 +168,38 @@ class SegmentMerger
 
             for ($count = 0; $count < $segmentInfo->count(); $count++) {
                 $fieldCount = $fdtFile->readVInt();
-                $storedFields = array();
+                $storedFields = [];
 
                 for ($count2 = 0; $count2 < $fieldCount; $count2++) {
                     $fieldNum = $fdtFile->readVInt();
                     $bits = $fdtFile->readByte();
                     $fieldInfo = $segmentInfo->getField($fieldNum);
 
-                    if (!($bits & 2)) { // Text data
+                    if (! ($bits & 2)) { // Text data
                         $storedFields[] =
-                                 new Document\Field($fieldInfo->name,
-                                                    $fdtFile->readString(),
-                                                    'UTF-8',
-                                                    true,
-                                                    $fieldInfo->isIndexed,
-                                                    $bits & 1 );
+                                 new Document\Field(
+                                     $fieldInfo->name,
+                                     $fdtFile->readString(),
+                                     'UTF-8',
+                                     true,
+                                     $fieldInfo->isIndexed,
+                                     $bits & 1
+                                 );
                     } else {            // Binary data
                         $storedFields[] =
-                                 new Document\Field($fieldInfo->name,
-                                                    $fdtFile->readBinary(),
-                                                    '',
-                                                    true,
-                                                    $fieldInfo->isIndexed,
-                                                    $bits & 1,
-                                                    true);
+                                 new Document\Field(
+                                     $fieldInfo->name,
+                                     $fdtFile->readBinary(),
+                                     '',
+                                     true,
+                                     $fieldInfo->isIndexed,
+                                     $bits & 1,
+                                     true
+                                 );
                     }
                 }
 
-                if (!$segmentInfo->isDeleted($count)) {
+                if (! $segmentInfo->isDeleted($count)) {
                     $this->_docCount++;
                     $this->_writer->addStoredFields($storedFields);
                 }
@@ -223,7 +227,7 @@ class SegmentMerger
 
         $this->_writer->initializeDictionaryFiles();
 
-        $termDocs = array();
+        $termDocs = [];
         while (($segmentInfo = $segmentInfoQueue->pop()) !== null) {
             // Merge positions array
             $termDocs += $segmentInfo->currentTermPositions();
@@ -238,7 +242,7 @@ class SegmentMerger
                 if (count($termDocs) > 0) {
                     $this->_writer->addTerm($segmentInfo->currentTerm(), $termDocs);
                 }
-                $termDocs = array();
+                $termDocs = [];
             }
 
             $segmentInfo->nextTerm();

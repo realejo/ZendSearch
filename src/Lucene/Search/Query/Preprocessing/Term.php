@@ -83,13 +83,15 @@ class Term extends AbstractPreprocessing
             if (Lucene\Lucene::getDefaultSearchField() === null) {
                 $searchFields = $index->getFieldNames(true);
             } else {
-                $searchFields = array(Lucene\Lucene::getDefaultSearchField());
+                $searchFields = [Lucene\Lucene::getDefaultSearchField()];
             }
 
             foreach ($searchFields as $fieldName) {
-                $subquery = new Term($this->_word,
-                                     $this->_encoding,
-                                     $fieldName);
+                $subquery = new Term(
+                    $this->_word,
+                    $this->_encoding,
+                    $fieldName
+                );
                 $rewrittenSubquery = $subquery->rewrite($index);
                 foreach ($rewrittenSubquery->getQueryTerms() as $term) {
                     $query->addTerm($term);
@@ -101,7 +103,7 @@ class Term extends AbstractPreprocessing
             }
 
             if (count($query->getTerms()) == 0) {
-                $this->_matches = array();
+                $this->_matches = [];
                 if ($hasInsignificantSubqueries) {
                     return new Query\Insignificant();
                 } else {
@@ -129,8 +131,8 @@ class Term extends AbstractPreprocessing
         // -------------------------------------
         // Recognize wildcard queries
 
-        /** 
-         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future 
+        /**
+         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future
          */
         ErrorHandler::start(E_WARNING);
         $result = preg_match('/\pL/u', 'a');
@@ -185,7 +187,7 @@ class Term extends AbstractPreprocessing
         $tokens = Analyzer\Analyzer::getDefault()->tokenize($this->_word, $this->_encoding);
 
         if (count($tokens) == 0) {
-            $this->_matches = array();
+            $this->_matches = [];
             return new Query\Insignificant();
         }
 
@@ -229,8 +231,8 @@ class Term extends AbstractPreprocessing
 
         // -------------------------------------
         // Recognize wildcard queries
-        /** 
-         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future 
+        /**
+         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future
          */
         ErrorHandler::start(E_WARNING);
         $result = preg_match('/\pL/u', 'a');
@@ -290,7 +292,7 @@ class Term extends AbstractPreprocessing
         }
 
         //It's not insignificant or one term query
-        $words = array();
+        $words = [];
         foreach ($tokens as $token) {
             $words[] = $token->getTermText();
         }

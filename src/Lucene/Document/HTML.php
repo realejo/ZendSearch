@@ -31,14 +31,14 @@ class HTML extends Document
      *
      * @var array
      */
-    private $_links = array();
+    private $_links = [];
 
     /**
      * List of document header links
      *
      * @var array
      */
-    private $_headerLinks = array();
+    private $_headerLinks = [];
 
     /**
      * Stored DOM representation
@@ -63,10 +63,10 @@ class HTML extends Document
      *
      * @var array
      */
-    private $_inlineTags = array('a', 'abbr', 'acronym', 'dfn', 'em', 'strong', 'code',
+    private $_inlineTags = ['a', 'abbr', 'acronym', 'dfn', 'em', 'strong', 'code',
                                 'samp', 'kbd', 'var', 'b', 'i', 'big', 'small', 'strike',
                                 'tt', 'u', 'font', 'span', 'bdo', 'cite', 'del', 'ins',
-                                'q', 'sub', 'sup');
+                                'q', 'sub', 'sup'];
 
     /**
      * Object constructor
@@ -117,7 +117,6 @@ class HTML extends Document
                                      . '</body></html>');
                 ErrorHandler::stop();
             }
-
         }
         /** @todo Add correction of wrong HTML encoding recognition processing
          * The case is:
@@ -137,9 +136,11 @@ class HTML extends Document
 
         $metaNodes = $xpath->query('/html/head/meta[@name]');
         foreach ($metaNodes as $metaNode) {
-            $this->addField(Field::Text($metaNode->getAttribute('name'),
-                                                           $metaNode->getAttribute('content'),
-                                                           'UTF-8'));
+            $this->addField(Field::Text(
+                $metaNode->getAttribute('name'),
+                $metaNode->getAttribute('content'),
+                'UTF-8'
+            ));
         }
 
         $docBody = '';
@@ -157,7 +158,7 @@ class HTML extends Document
         $linkNodes = $this->_doc->getElementsByTagName('a');
         foreach ($linkNodes as $linkNode) {
             if (($href = $linkNode->getAttribute('href')) != '' &&
-                (!self::$_excludeNoFollowLinks  ||  strtolower($linkNode->getAttribute('rel')) != 'nofollow' )
+                (! self::$_excludeNoFollowLinks  ||  strtolower($linkNode->getAttribute('rel')) != 'nofollow' )
                ) {
                 $this->_links[] = $href;
             }
@@ -165,7 +166,7 @@ class HTML extends Document
         $linkNodes = $this->_doc->getElementsByTagName('area');
         foreach ($linkNodes as $linkNode) {
             if (($href = $linkNode->getAttribute('href')) != '' &&
-                (!self::$_excludeNoFollowLinks  ||  strtolower($linkNode->getAttribute('rel')) != 'nofollow' )
+                (! self::$_excludeNoFollowLinks  ||  strtolower($linkNode->getAttribute('rel')) != 'nofollow' )
                ) {
                 $this->_links[] = $href;
             }
@@ -213,7 +214,7 @@ class HTML extends Document
     {
         if ($node->nodeType == XML_TEXT_NODE) {
             $text .= $node->nodeValue;
-            if(!in_array($node->parentNode->tagName, $this->_inlineTags)) {
+            if (! in_array($node->parentNode->tagName, $this->_inlineTags)) {
                 $text .= ' ';
             }
         } elseif ($node->nodeType == XML_ELEMENT_NODE  &&  $node->nodeName != 'script') {
@@ -284,7 +285,7 @@ class HTML extends Document
         $analyzer = Analyzer\Analyzer::getDefault();
         $analyzer->setInput($node->nodeValue, 'UTF-8');
 
-        $matchedTokens = array();
+        $matchedTokens = [];
 
         while (($token = $analyzer->nextToken()) !== null) {
             if (isset($wordsToHighlight[$token->getTermText()])) {
@@ -319,7 +320,7 @@ class HTML extends Document
                                        . $highlightedWordNodeSetHTML
                                        . '</body></html>');
             ErrorHandler::stop();
-            if (!$success) {
+            if (! $success) {
                 throw new RuntimeException("Error occured while loading highlighted text fragment: '$highlightedWordNodeSetHTML'.");
             }
             $highlightedWordNodeSetXpath = new \DOMXPath($highlightedWordNodeSetDomDocument);
@@ -327,8 +328,10 @@ class HTML extends Document
 
             for ($count = 0; $count < $highlightedWordNodeSet->length; $count++) {
                 $nodeToImport = $highlightedWordNodeSet->item($count);
-                $node->parentNode->insertBefore($this->_doc->importNode($nodeToImport, true /* deep copy */),
-                                                $matchedWordNode);
+                $node->parentNode->insertBefore(
+                    $this->_doc->importNode($nodeToImport, true /* deep copy */),
+                    $matchedWordNode
+                );
             }
 
             $node->parentNode->removeChild($matchedWordNode);
@@ -346,9 +349,9 @@ class HTML extends Document
      */
     protected function _highlightNodeRecursive(\DOMNode $contextNode, $wordsToHighlight, $callback, $params)
     {
-        $textNodes = array();
+        $textNodes = [];
 
-        if (!$contextNode->hasChildNodes()) {
+        if (! $contextNode->hasChildNodes()) {
             return;
         }
 
@@ -390,7 +393,7 @@ class HTML extends Document
      */
     public function highlight($words, $colour = '#66ffff')
     {
-        return $this->highlightExtended($words, array($this, 'applyColour'), array($colour));
+        return $this->highlightExtended($words, [$this, 'applyColour'], [$colour]);
     }
 
 
@@ -405,13 +408,13 @@ class HTML extends Document
      * @throws \ZendSearch\Lucene\Exception\InvalidArgumentException
      * @return string
      */
-    public function highlightExtended($words, $callback, $params = array())
+    public function highlightExtended($words, $callback, $params = [])
     {
-        if (!is_array($words)) {
-            $words = array($words);
+        if (! is_array($words)) {
+            $words = [$words];
         }
 
-        $wordsToHighlightList = array();
+        $wordsToHighlightList = [];
         $analyzer = Analyzer\Analyzer::getDefault();
         foreach ($words as $wordString) {
             $wordsToHighlightList[] = $analyzer->tokenize($wordString);
@@ -422,12 +425,12 @@ class HTML extends Document
             return $this->_doc->saveHTML();
         }
 
-        $wordsToHighlightFlipped = array();
+        $wordsToHighlightFlipped = [];
         foreach ($wordsToHighlight as $id => $token) {
             $wordsToHighlightFlipped[$token->getTermText()] = $id;
         }
 
-        if (!is_callable($callback)) {
+        if (! is_callable($callback)) {
             throw new InvalidArgumentException('$viewHelper parameter mast be a View Helper name, View Helper object or callback.');
         }
 
@@ -460,7 +463,7 @@ class HTML extends Document
         $xpath = new \DOMXPath($this->_doc);
         $bodyNodes = $xpath->query('/html/body')->item(0)->childNodes;
 
-        $outputFragments = array();
+        $outputFragments = [];
         for ($count = 0; $count < $bodyNodes->length; $count++) {
             $outputFragments[] = $this->_doc->saveXML($bodyNodes->item($count));
         }

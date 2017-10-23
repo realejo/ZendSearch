@@ -49,7 +49,7 @@ class Index implements SearchIndexInterface
      *
      * @var array|\ZendSearch\Lucene\Index\SegmentInfo
      */
-    private $_segmentInfos = array();
+    private $_segmentInfos = [];
 
     /**
      * Number of documents in this index.
@@ -247,9 +247,11 @@ class Index implements SearchIndexInterface
             $segSize = $segmentsFile->readInt();
             $this->_docCount += $segSize;
 
-            $this->_segmentInfos[$segName] = new Index\SegmentInfo($this->_directory,
-                                                                   $segName,
-                                                                   $segSize);
+            $this->_segmentInfos[$segName] = new Index\SegmentInfo(
+                $this->_directory,
+                $segName,
+                $segSize
+            );
         }
 
         // Use 2.1 as a target version. Index will be reorganized at update time.
@@ -301,9 +303,9 @@ class Index implements SearchIndexInterface
                     $docStoreSegment        = $segmentsFile->readString();
                     $docStoreIsCompoundFile = $segmentsFile->readByte();
 
-                    $docStoreOptions = array('offset'     => $docStoreOffset,
+                    $docStoreOptions = ['offset'     => $docStoreOffset,
                                              'segment'    => $docStoreSegment,
-                                             'isCompound' => ($docStoreIsCompoundFile == 1));
+                                             'isCompound' => ($docStoreIsCompoundFile == 1)];
                 } else {
                     $docStoreOptions = null;
                 }
@@ -314,7 +316,7 @@ class Index implements SearchIndexInterface
             $hasSingleNormFile = $segmentsFile->readByte();
             $numField          = $segmentsFile->readInt();
 
-            $normGens = array();
+            $normGens = [];
             if ($numField != (int)0xFFFFFFFF) {
                 for ($count1 = 0; $count1 < $numField; $count1++) {
                     $normGens[] = $segmentsFile->readLong();
@@ -340,13 +342,15 @@ class Index implements SearchIndexInterface
 
             $this->_docCount += $segSize;
 
-            $this->_segmentInfos[$segName] = new Index\SegmentInfo($this->_directory,
-                                                                   $segName,
-                                                                   $segSize,
-                                                                   $delGen,
-                                                                   $docStoreOptions,
-                                                                   $hasSingleNormFile,
-                                                                   $isCompound);
+            $this->_segmentInfos[$segName] = new Index\SegmentInfo(
+                $this->_directory,
+                $segName,
+                $segSize,
+                $delGen,
+                $docStoreOptions,
+                $hasSingleNormFile,
+                $isCompound
+            );
         }
     }
 
@@ -374,7 +378,7 @@ class Index implements SearchIndexInterface
             $this->_closeDirOnExit = false;
         }
 
-        $this->_segmentInfos = array();
+        $this->_segmentInfos = [];
 
         // Mark index as "under processing" to prevent other processes from premature index cleaning
         LockManager::obtainReadLock($this->_directory);
@@ -448,9 +452,11 @@ class Index implements SearchIndexInterface
     private function _getIndexWriter()
     {
         if ($this->_writer === null) {
-            $this->_writer = new Index\Writer($this->_directory,
-                                              $this->_segmentInfos,
-                                              $this->_formatVersion);
+            $this->_writer = new Index\Writer(
+                $this->_directory,
+                $this->_segmentInfos,
+                $this->_formatVersion
+            );
         }
 
         return $this->_writer;
@@ -511,7 +517,7 @@ class Index implements SearchIndexInterface
      *
      * @param integer $id
      * @return boolean
-     * @throws \ZendSearch\Lucene\Exception\OutOfRangeException	is thrown if $id is out of the range
+     * @throws \ZendSearch\Lucene\Exception\OutOfRangeException is thrown if $id is out of the range
      */
     public function isDeleted($id)
     {
@@ -656,15 +662,15 @@ class Index implements SearchIndexInterface
     {
         if (is_string($query)) {
             $query = Search\QueryParser::parse($query);
-        } elseif (!$query instanceof Search\Query\AbstractQuery) {
+        } elseif (! $query instanceof Search\Query\AbstractQuery) {
             throw new InvalidArgumentException('Query must be a string or ZendSearch\Lucene\Search\Query object');
         }
 
         $this->commit();
 
-        $hits   = array();
-        $scores = array();
-        $ids    = array();
+        $hits   = [];
+        $scores = [];
+        $ids    = [];
 
         $query = $query->rewrite($this)->optimize($this);
 
@@ -675,7 +681,7 @@ class Index implements SearchIndexInterface
         $resultSetLimit = Lucene::getResultSetLimit();
         foreach ($query->matchedDocs() as $id => $num) {
             $docScore = $query->score($id, $this);
-            if( $docScore != 0 ) {
+            if ($docScore != 0) {
                 $hit = new Search\QueryHit($this);
                 $hit->document_id = $hit->id = $id;
                 $hit->score = $docScore;
@@ -696,7 +702,7 @@ class Index implements SearchIndexInterface
 
         if (count($hits) == 0) {
             // skip sorting, which may cause a error on empty index
-            return array();
+            return [];
         }
 
         if ($topScore > 1) {
@@ -707,15 +713,21 @@ class Index implements SearchIndexInterface
 
         if (func_num_args() == 1) {
             // sort by scores
-            array_multisort($scores, SORT_DESC, SORT_NUMERIC,
-                            $ids,    SORT_ASC,  SORT_NUMERIC,
-                            $hits);
+            array_multisort(
+                $scores,
+                SORT_DESC,
+                SORT_NUMERIC,
+                $ids,
+                SORT_ASC,
+                SORT_NUMERIC,
+                $hits
+            );
         } else {
             // sort by given field names
 
             $argList    = func_get_args();
             $fieldNames = $this->getFieldNames();
-            $sortArgs   = array();
+            $sortArgs   = [];
 
             // PHP 5.3 now expects all arguments to array_multisort be passed by
             // reference (if it's invoked through call_user_func_array());
@@ -724,24 +736,24 @@ class Index implements SearchIndexInterface
             $sortAsc    = SORT_ASC;
             $sortNum    = SORT_NUMERIC;
 
-            $sortFieldValues = array();
+            $sortFieldValues = [];
 
             for ($count = 1; $count < count($argList); $count++) {
                 $fieldName = $argList[$count];
 
-                if (!is_string($fieldName)) {
+                if (! is_string($fieldName)) {
                     throw new RuntimeException('Field name must be a string.');
                 }
 
                 if (strtolower($fieldName) == 'score') {
                     $sortArgs[] = &$scores;
                 } else {
-                    if (!in_array($fieldName, $fieldNames)) {
+                    if (! in_array($fieldName, $fieldNames)) {
                         throw new RuntimeException('Wrong field name.');
                     }
 
-                    if (!isset($sortFieldValues[$fieldName])) {
-                        $valuesArray = array();
+                    if (! isset($sortFieldValues[$fieldName])) {
+                        $valuesArray = [];
                         foreach ($hits as $hit) {
                             try {
                                 $value = $hit->getDocument()->getFieldValue($fieldName);
@@ -765,11 +777,11 @@ class Index implements SearchIndexInterface
                     $sortArgs[] = &$sortFieldValues[$fieldName];
                 }
 
-                if ($count + 1 < count($argList)  &&  is_integer($argList[$count+1])) {
+                if ($count + 1 < count($argList)  &&  is_integer($argList[$count + 1])) {
                     $count++;
                     $sortArgs[] = &$argList[$count];
 
-                    if ($count + 1 < count($argList)  &&  is_integer($argList[$count+1])) {
+                    if ($count + 1 < count($argList)  &&  is_integer($argList[$count + 1])) {
                         $count++;
                         $sortArgs[] = &$argList[$count];
                     } else {
@@ -809,8 +821,8 @@ class Index implements SearchIndexInterface
      */
     public function getFieldNames($indexed = false)
     {
-        $result = array();
-        foreach( $this->_segmentInfos as $segmentInfo ) {
+        $result = [];
+        foreach ($this->_segmentInfos as $segmentInfo) {
             $result = array_merge($result, $segmentInfo->getFields($indexed));
         }
         return $result;
@@ -846,7 +858,7 @@ class Index implements SearchIndexInterface
         }
 
         $fdxFile = $segmentInfo->openCompoundFile('.fdx');
-        $fdxFile->seek(($id-$segmentStartId)*8, SEEK_CUR);
+        $fdxFile->seek(($id - $segmentStartId) * 8, SEEK_CUR);
         $fieldValuesPosition = $fdxFile->readLong();
 
         $fdtFile = $segmentInfo->openCompoundFile('.fdt');
@@ -860,21 +872,25 @@ class Index implements SearchIndexInterface
 
             $fieldInfo = $segmentInfo->getField($fieldNum);
 
-            if (!($bits & 2)) { // Text data
-                $field = new Document\Field($fieldInfo->name,
-                                            $fdtFile->readString(),
-                                            'UTF-8',
-                                            true,
-                                            $fieldInfo->isIndexed,
-                                            $bits & 1 );
+            if (! ($bits & 2)) { // Text data
+                $field = new Document\Field(
+                    $fieldInfo->name,
+                    $fdtFile->readString(),
+                    'UTF-8',
+                    true,
+                    $fieldInfo->isIndexed,
+                    $bits & 1
+                );
             } else {            // Binary data
-                $field = new Document\Field($fieldInfo->name,
-                                            $fdtFile->readBinary(),
-                                            '',
-                                            true,
-                                            $fieldInfo->isIndexed,
-                                            $bits & 1,
-                                            true );
+                $field = new Document\Field(
+                    $fieldInfo->name,
+                    $fdtFile->readBinary(),
+                    '',
+                    true,
+                    $fieldInfo->isIndexed,
+                    $bits & 1,
+                    true
+                );
             }
 
             $doc->addField($field);
@@ -912,7 +928,7 @@ class Index implements SearchIndexInterface
      */
     public function termDocs(Index\Term $term, $docsFilter = null)
     {
-        $subResults = array();
+        $subResults = [];
         $segmentStartDocId = 0;
 
         foreach ($this->_segmentInfos as $segmentInfo) {
@@ -922,7 +938,7 @@ class Index implements SearchIndexInterface
         }
 
         if (count($subResults) == 0) {
-            return array();
+            return [];
         } elseif (count($subResults) == 1) {
             // Index is optimized (only one segment)
             // Do not perform array reindexing
@@ -956,7 +972,7 @@ class Index implements SearchIndexInterface
         }
 
         if (count($subResults) == 0) {
-            return array();
+            return [];
         } elseif (count($subResults) == 1) {
             // Index is optimized (only one segment)
             // Do not perform array reindexing
@@ -979,7 +995,7 @@ class Index implements SearchIndexInterface
      */
     public function termFreqs(Index\Term $term, $docsFilter = null)
     {
-        $result = array();
+        $result = [];
         $segmentStartDocId = 0;
         foreach ($this->_segmentInfos as $segmentInfo) {
             $result += $segmentInfo->termFreqs($term, $segmentStartDocId, $docsFilter);
@@ -1000,7 +1016,7 @@ class Index implements SearchIndexInterface
      */
     public function termPositions(Index\Term $term, $docsFilter = null)
     {
-        $result = array();
+        $result = [];
         $segmentStartDocId = 0;
         foreach ($this->_segmentInfos as $segmentInfo) {
             $result += $segmentInfo->termPositions($term, $segmentStartDocId, $docsFilter);
@@ -1188,7 +1204,7 @@ class Index implements SearchIndexInterface
      */
     public function terms()
     {
-        $result = array();
+        $result = [];
 
         $segmentInfoQueue = new Index\TermsPriorityQueue();
 
@@ -1291,5 +1307,6 @@ class Index implements SearchIndexInterface
      * @todo Implementation
      */
     public function undeleteAll()
-    {}
+    {
+    }
 }

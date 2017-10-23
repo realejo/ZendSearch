@@ -96,7 +96,7 @@ class Fuzzy extends AbstractPreprocessing
             if (Lucene\Lucene::getDefaultSearchField() === null) {
                 $searchFields = $index->getFieldNames(true);
             } else {
-                $searchFields = array(Lucene\Lucene::getDefaultSearchField());
+                $searchFields = [Lucene\Lucene::getDefaultSearchField()];
             }
 
             foreach ($searchFields as $fieldName) {
@@ -107,7 +107,7 @@ class Fuzzy extends AbstractPreprocessing
 
                 $rewrittenSubquery = $subquery->rewrite($index);
 
-                if ( !($rewrittenSubquery instanceof Query\Insignificant  ||
+                if (! ($rewrittenSubquery instanceof Query\Insignificant  ||
                        $rewrittenSubquery instanceof Query\EmptyResult) ) {
                     $query->addSubquery($rewrittenSubquery);
                 }
@@ -120,7 +120,7 @@ class Fuzzy extends AbstractPreprocessing
             $subqueries = $query->getSubqueries();
 
             if (count($subqueries) == 0) {
-                $this->_matches = array();
+                $this->_matches = [];
                 if ($hasInsignificantSubqueries) {
                     return new Query\Insignificant();
                 } else {
@@ -157,8 +157,8 @@ class Fuzzy extends AbstractPreprocessing
         // -------------------------------------
         // Recognize wildcard queries
 
-        /** 
-         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future 
+        /**
+         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future
          */
         ErrorHandler::start(E_WARNING);
         $result = preg_match('/\pL/u', 'a');
@@ -178,7 +178,7 @@ class Fuzzy extends AbstractPreprocessing
         $tokens = Analyzer\Analyzer::getDefault()->tokenize($this->_word, $this->_encoding);
 
         if (count($tokens) == 0) {
-            $this->_matches = array();
+            $this->_matches = [];
             return new Query\Insignificant();
         }
 
@@ -212,8 +212,8 @@ class Fuzzy extends AbstractPreprocessing
         // -------------------------------------
         // Recognize wildcard queries
 
-        /** 
-         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future 
+        /**
+         * @todo check for PCRE unicode support may be performed through Zend_Environment in some future
          */
         ErrorHandler::start(E_WARNING);
         $result = preg_match('/\pL/u', 'a');

@@ -89,7 +89,7 @@ class Term extends AbstractQuery
     public function optimize(Lucene\SearchIndexInterface $index)
     {
         // Check, that index contains specified term
-        if (!$index->hasTerm($this->_term)) {
+        if (! $index->hasTerm($this->_term)) {
             return new EmptyResult();
         }
 
@@ -163,7 +163,7 @@ class Term extends AbstractQuery
      */
     public function getQueryTerms()
     {
-        return array($this->_term);
+        return [$this->_term];
     }
 
     /**
@@ -209,4 +209,3 @@ class Term extends AbstractQuery
         return $query;
     }
 }
-

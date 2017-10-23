@@ -39,7 +39,7 @@ class LockManager
     public static function obtainWriteLock(Directory $lockDirectory)
     {
         $lock = $lockDirectory->createFile(self::WRITE_LOCK_FILE);
-        if (!$lock->lock(LOCK_EX)) {
+        if (! $lock->lock(LOCK_EX)) {
             throw new RuntimeException('Can\'t obtain exclusive index lock');
         }
         return $lock;
@@ -83,7 +83,7 @@ class LockManager
     private static function _startReadLockProcessing(Directory $lockDirectory)
     {
         $lock = $lockDirectory->createFile(self::READ_LOCK_PROCESSING_LOCK_FILE);
-        if (!$lock->lock(LOCK_EX)) {
+        if (! $lock->lock(LOCK_EX)) {
             throw new RuntimeException('Can\'t obtain exclusive lock for the read lock processing file');
         }
         return $lock;
@@ -116,7 +116,7 @@ class LockManager
     public static function obtainReadLock(Directory $lockDirectory)
     {
         $lock = $lockDirectory->createFile(self::READ_LOCK_FILE);
-        if (!$lock->lock(LOCK_SH)) {
+        if (! $lock->lock(LOCK_SH)) {
             throw new RuntimeException('Can\'t obtain shared reading index lock');
         }
         return $lock;
@@ -199,7 +199,7 @@ class LockManager
     public static function obtainOptimizationLock(Directory $lockDirectory)
     {
         $lock = $lockDirectory->createFile(self::OPTIMIZATION_LOCK_FILE);
-        if (!$lock->lock(LOCK_EX, true)) {
+        if (! $lock->lock(LOCK_EX, true)) {
             return false;
         }
         return $lock;

@@ -28,7 +28,7 @@ class Document
      *
      * @var array
      */
-    protected $_fields = array();
+    protected $_fields = [];
 
     /**
      * Field boost factor
@@ -96,7 +96,7 @@ class Document
      */
     public function getField($fieldName)
     {
-        if (!array_key_exists($fieldName, $this->_fields)) {
+        if (! array_key_exists($fieldName, $this->_fields)) {
             throw new InvalidArgumentException("Field name \"$fieldName\" not found in document.");
         }
         return $this->_fields[$fieldName];

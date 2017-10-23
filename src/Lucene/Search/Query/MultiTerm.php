@@ -30,7 +30,7 @@ class MultiTerm extends AbstractQuery
      *
      * @var array
      */
-    private $_terms = array();
+    private $_terms = [];
 
     /**
      * Term signs.
@@ -59,7 +59,7 @@ class MultiTerm extends AbstractQuery
      *
      * @var array
      */
-    private $_termsFreqs = array();
+    private $_termsFreqs = [];
 
 
     /**
@@ -79,7 +79,7 @@ class MultiTerm extends AbstractQuery
      *
      * @var array
      */
-    private $_weights = array();
+    private $_weights = [];
 
 
     /**
@@ -104,7 +104,7 @@ class MultiTerm extends AbstractQuery
             $this->_signs = null;
             // Check if all terms are required
             if (is_array($signs)) {
-                foreach ($signs as $sign ) {
+                foreach ($signs as $sign) {
                     if ($sign !== true) {
                         $this->_signs = $signs;
                         break;
@@ -131,7 +131,7 @@ class MultiTerm extends AbstractQuery
     {
         if ($sign !== true || $this->_signs !== null) {       // Skip, if all terms are required
             if ($this->_signs === null) {                     // Check, If all previous terms are required
-                $this->_signs = array();
+                $this->_signs = [];
                 foreach ($this->_terms as $prevTerm) {
                     $this->_signs[] = true;
                 }
@@ -174,8 +174,10 @@ class MultiTerm extends AbstractQuery
             foreach ($this->_terms as $termId => $term) {
                 $subquery = new Term($term);
 
-                $query->addSubquery($subquery->rewrite($index),
-                                    ($this->_signs === null)?  true : $this->_signs[$termId]);
+                $query->addSubquery(
+                    $subquery->rewrite($index),
+                    ($this->_signs === null) ? true : $this->_signs[$termId]
+                );
             }
 
             return $query;
@@ -194,7 +196,7 @@ class MultiTerm extends AbstractQuery
         $signs = $this->_signs;
 
         foreach ($terms as $id => $term) {
-            if (!$index->hasTerm($term)) {
+            if (! $index->hasTerm($term)) {
                 if ($signs === null  ||  $signs[$id] === true) {
                     // Term is required
                     return new EmptyResult();
@@ -306,19 +308,25 @@ class MultiTerm extends AbstractQuery
         $this->_resVector = null;
 
         if (count($this->_terms) == 0) {
-            $this->_resVector = array();
+            $this->_resVector = [];
         }
 
         // Order terms by selectivity
-        $docFreqs = array();
-        $ids      = array();
+        $docFreqs = [];
+        $ids      = [];
         foreach ($this->_terms as $id => $term) {
             $docFreqs[] = $reader->docFreq($term);
             $ids[]      = $id; // Used to keep original order for terms with the same selectivity and omit terms comparison
         }
-        array_multisort($docFreqs, SORT_ASC, SORT_NUMERIC,
-                        $ids,      SORT_ASC, SORT_NUMERIC,
-                        $this->_terms);
+        array_multisort(
+            $docFreqs,
+            SORT_ASC,
+            SORT_NUMERIC,
+            $ids,
+            SORT_ASC,
+            SORT_NUMERIC,
+            $this->_terms
+        );
 
         $docsFilter = new Lucene\Index\DocsFilter();
         foreach ($this->_terms as $termId => $term) {
@@ -345,12 +353,12 @@ class MultiTerm extends AbstractQuery
      */
     private function _calculateNonConjunctionResult(Lucene\SearchIndexInterface $reader)
     {
-        $requiredVectors      = array();
-        $requiredVectorsSizes = array();
-        $requiredVectorsIds   = array(); // is used to prevent arrays comparison
+        $requiredVectors      = [];
+        $requiredVectorsSizes = [];
+        $requiredVectorsIds   = []; // is used to prevent arrays comparison
 
-        $optional   = array();
-        $prohibited = array();
+        $optional   = [];
+        $prohibited = [];
 
         foreach ($this->_terms as $termId => $term) {
             $termDocs = array_flip($reader->termDocs($term));
@@ -374,13 +382,19 @@ class MultiTerm extends AbstractQuery
         }
 
         // sort resvectors in order of subquery cardinality increasing
-        array_multisort($requiredVectorsSizes, SORT_ASC, SORT_NUMERIC,
-                        $requiredVectorsIds,   SORT_ASC, SORT_NUMERIC,
-                        $requiredVectors);
+        array_multisort(
+            $requiredVectorsSizes,
+            SORT_ASC,
+            SORT_NUMERIC,
+            $requiredVectorsIds,
+            SORT_ASC,
+            SORT_NUMERIC,
+            $requiredVectors
+        );
 
         $required = null;
         foreach ($requiredVectors as $nextResVector) {
-            if($required === null) {
+            if ($required === null) {
                 $required = $nextResVector;
             } else {
                 //$required = array_intersect_key($required, $nextResVector);
@@ -388,7 +402,7 @@ class MultiTerm extends AbstractQuery
                 /**
                  * This code is used as workaround for array_intersect_key() slowness problem.
                  */
-                $updatedVector = array();
+                $updatedVector = [];
                 foreach ($required as $id => $value) {
                     if (isset($nextResVector[$id])) {
                         $updatedVector[$id] = $value;
@@ -446,8 +460,10 @@ class MultiTerm extends AbstractQuery
     public function _conjunctionScore($docId, Lucene\SearchIndexInterface $reader)
     {
         if ($this->_coord === null) {
-            $this->_coord = $reader->getSimilarity()->coord(count($this->_terms),
-                                                            count($this->_terms) );
+            $this->_coord = $reader->getSimilarity()->coord(
+                count($this->_terms),
+                count($this->_terms)
+            );
         }
 
         $score = 0.0;
@@ -476,7 +492,7 @@ class MultiTerm extends AbstractQuery
     public function _nonConjunctionScore($docId, $reader)
     {
         if ($this->_coord === null) {
-            $this->_coord = array();
+            $this->_coord = [];
 
             $maxCoord = 0;
             foreach ($this->_signs as $sign) {
@@ -492,7 +508,7 @@ class MultiTerm extends AbstractQuery
 
         $score = 0.0;
         $matchedTerms = 0;
-        foreach ($this->_terms as $termId=>$term) {
+        foreach ($this->_terms as $termId => $term) {
             // Check if term is
             if ($this->_signs[$termId] !== false &&        // not prohibited
                 isset($this->_termsFreqs[$termId][$docId]) // matched
@@ -575,7 +591,7 @@ class MultiTerm extends AbstractQuery
             return $this->_terms;
         }
 
-        $terms = array();
+        $terms = [];
 
         foreach ($this->_signs as $id => $sign) {
             if ($sign !== false) {
@@ -593,7 +609,7 @@ class MultiTerm extends AbstractQuery
      */
     protected function _highlightMatches(Highlighter $highlighter)
     {
-        $words = array();
+        $words = [];
 
         if ($this->_signs === null) {
             foreach ($this->_terms as $term) {

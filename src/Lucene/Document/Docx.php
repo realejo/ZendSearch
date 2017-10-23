@@ -41,15 +41,15 @@ class Docx extends AbstractOpenXML
      */
     private function __construct($fileName, $storeContent)
     {
-        if (!class_exists('ZipArchive', false)) {
+        if (! class_exists('ZipArchive', false)) {
             throw new ExtensionNotLoadedException(
                 'MS Office documents processing functionality requires Zip extension to be loaded'
             );
         }
 
         // Document data holders
-        $documentBody = array();
-        $coreProperties = array();
+        $documentBody = [];
+        $coreProperties = [];
 
         // Open AbstractOpenXML package
         $package = new \ZipArchive();
@@ -69,14 +69,14 @@ class Docx extends AbstractOpenXML
         // Restore entity loader state
         libxml_disable_entity_loader($loadEntities);
 
-        foreach($relations->Relationship as $rel) {
+        foreach ($relations->Relationship as $rel) {
             if ($rel ["Type"] == AbstractOpenXML::SCHEMA_OFFICEDOCUMENT) {
                 // Found office document! Read in contents...
                 $contents = simplexml_load_string($package->getFromName(
-                                                                $this->absoluteZipPath(dirname($rel['Target'])
+                    $this->absoluteZipPath(dirname($rel['Target'])
                                                               . '/'
                                                               . basename($rel['Target']))
-                                                                       ));
+                ));
 
                 $contents->registerXPathNamespace('w', self::SCHEMA_WORDPROCESSINGML);
                 $paragraphs = $contents->xpath('//w:body/w:p');
@@ -90,12 +90,12 @@ class Docx extends AbstractOpenXML
                     }
 
                     foreach ($runs as $run) {
-                     if ($run->getName() == 'br') {
-                         // Break element
-                         $documentBody[] = ' ';
-                     } else {
-                         $documentBody[] = (string)$run;
-                     }
+                        if ($run->getName() == 'br') {
+                            // Break element
+                            $documentBody[] = ' ';
+                        } else {
+                            $documentBody[] = (string)$run;
+                        }
                     }
 
                     // Add space after each paragraph. So they are not bound together.
@@ -143,7 +143,7 @@ class Docx extends AbstractOpenXML
      */
     public static function loadDocxFile($fileName, $storeContent = false)
     {
-        if (!is_readable($fileName)) {
+        if (! is_readable($fileName)) {
             throw new InvalidArgumentException('Provided file \'' . $fileName . '\' is not readable.');
         }
 

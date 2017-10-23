@@ -29,7 +29,7 @@ class LowerCaseUtf8 implements TokenFilterInterface
      */
     public function __construct()
     {
-        if (!function_exists('mb_strtolower')) {
+        if (! function_exists('mb_strtolower')) {
             // mbstring extension is disabled
             throw new ExtensionNotLoadedException('Utf8 compatible lower case filter needs mbstring extension to be enabled.');
         }
@@ -43,13 +43,14 @@ class LowerCaseUtf8 implements TokenFilterInterface
      */
     public function normalize(Token $srcToken)
     {
-        $newToken = new Token(mb_strtolower($srcToken->getTermText(), 'UTF-8'),
-                                       $srcToken->getStartOffset(),
-                                       $srcToken->getEndOffset());
+        $newToken = new Token(
+            mb_strtolower($srcToken->getTermText(), 'UTF-8'),
+            $srcToken->getStartOffset(),
+            $srcToken->getEndOffset()
+        );
 
         $newToken->setPositionIncrement($srcToken->getPositionIncrement());
 
         return $newToken;
     }
 }
-

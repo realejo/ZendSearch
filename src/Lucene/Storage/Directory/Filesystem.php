@@ -102,13 +102,13 @@ class Filesystem implements DirectoryInterface
      */
     public function __construct($path)
     {
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             if (file_exists($path)) {
                 throw new Lucene\Exception\InvalidArgumentException(
                     'Path exists, but it\'s not a directory'
                 );
             } else {
-                if (!self::mkdirs($path)) {
+                if (! self::mkdirs($path)) {
                     throw new Lucene\Exception\InvalidArgumentException(
                         "Can't create directory '$path'."
                     );
@@ -116,7 +116,7 @@ class Filesystem implements DirectoryInterface
             }
         }
         $this->_dirPath = $path;
-        $this->_fileHandlers = array();
+        $this->_fileHandlers = [];
     }
 
 
@@ -131,7 +131,7 @@ class Filesystem implements DirectoryInterface
             $fileObject->close();
         }
 
-        $this->_fileHandlers = array();
+        $this->_fileHandlers = [];
     }
 
 
@@ -142,13 +142,15 @@ class Filesystem implements DirectoryInterface
      */
     public function fileList()
     {
-        $result = array();
+        $result = [];
 
-        $dirContent = opendir( $this->_dirPath );
+        $dirContent = opendir($this->_dirPath);
         while (($file = readdir($dirContent)) !== false) {
-            if (($file == '..')||($file == '.'))   continue;
+            if (($file == '..')||($file == '.')) {
+                continue;
+            }
 
-            if( !is_dir($this->_dirPath . '/' . $file) ) {
+            if (! is_dir($this->_dirPath . '/' . $file)) {
                 $result[] = $file;
             }
         }
@@ -196,8 +198,9 @@ class Filesystem implements DirectoryInterface
         unset($this->_fileHandlers[$filename]);
 
         global $php_errormsg;
-        $trackErrors = ini_get('track_errors'); ini_set('track_errors', '1');
-        if (!@unlink($this->_dirPath . '/' . $filename)) {
+        $trackErrors = ini_get('track_errors');
+        ini_set('track_errors', '1');
+        if (! @unlink($this->_dirPath . '/' . $filename)) {
             ini_set('track_errors', $trackErrors);
             throw new Lucene\Exception\RuntimeException('Can\'t delete file: ' . $php_errormsg);
         }
@@ -242,7 +245,7 @@ class Filesystem implements DirectoryInterface
      */
     public function fileLength($filename)
     {
-        if (isset( $this->_fileHandlers[$filename] )) {
+        if (isset($this->_fileHandlers[$filename])) {
             return $this->_fileHandlers[$filename]->size();
         }
         return filesize($this->_dirPath .'/'. $filename);
@@ -284,7 +287,7 @@ class Filesystem implements DirectoryInterface
         unset($this->_fileHandlers[$to]);
 
         if (file_exists($this->_dirPath . '/' . $to)) {
-            if (!unlink($this->_dirPath . '/' . $to)) {
+            if (! unlink($this->_dirPath . '/' . $to)) {
                 throw new Lucene\Exception\RuntimeException(
                     'Delete operation failed'
                 );
@@ -297,7 +300,7 @@ class Filesystem implements DirectoryInterface
         ErrorHandler::start(E_WARNING);
         $success = rename($this->_dirPath . '/' . $from, $this->_dirPath . '/' . $to);
         ErrorHandler::stop();
-        if (!$success) {
+        if (! $success) {
             ini_set('track_errors', $trackErrors);
             throw new Lucene\Exception\RuntimeException($php_errormsg);
         }
@@ -336,11 +339,11 @@ class Filesystem implements DirectoryInterface
     {
         $fullFilename = $this->_dirPath . '/' . $filename;
 
-        if (!$shareHandler) {
+        if (! $shareHandler) {
             return new File\Filesystem($fullFilename);
         }
 
-        if (isset( $this->_fileHandlers[$filename] )) {
+        if (isset($this->_fileHandlers[$filename])) {
             $this->_fileHandlers[$filename]->seek(0);
             return $this->_fileHandlers[$filename];
         }

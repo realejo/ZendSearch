@@ -94,14 +94,14 @@ class Writer
      *
      * @var array
      */
-    private $_newSegments = array();
+    private $_newSegments = [];
 
     /**
      * List of segments to be deleted on commit
      *
      * @var array
      */
-    private $_segmentsToDelete = array();
+    private $_segmentsToDelete = [];
 
     /**
      * Current segment to add documents
@@ -131,7 +131,7 @@ class Writer
      *
      * @var array
      */
-    private static $_indexExtensions = array('.cfs' => '.cfs',
+    private static $_indexExtensions = ['.cfs' => '.cfs',
                                              '.cfx' => '.cfx',
                                              '.fnm' => '.fnm',
                                              '.fdx' => '.fdx',
@@ -144,7 +144,7 @@ class Writer
                                              '.tvd' => '.tvd',
                                              '.tvf' => '.tvf',
                                              '.del' => '.del',
-                                             '.sti' => '.sti' );
+                                             '.sti' => '.sti' ];
 
 
     /**
@@ -161,10 +161,10 @@ class Writer
             foreach ($directory->fileList() as $file) {
                 if ($file == 'deletable' ||
                     $file == 'segments'  ||
-                    isset(self::$_indexExtensions[ substr($file, strlen($file)-4)]) ||
+                    isset(self::$_indexExtensions[ substr($file, strlen($file) - 4)]) ||
                     preg_match('/\.f\d+$/i', $file) /* matches <segment_name>.f<decimal_nmber> file names */) {
                         $directory->deleteFile($file);
-                    }
+                }
             }
 
             $segmentsFile = $directory->createFile('segments');
@@ -247,12 +247,12 @@ class Writer
      */
     private function _hasAnythingToMerge()
     {
-        $segmentSizes = array();
+        $segmentSizes = [];
         foreach ($this->_segmentInfos as $segName => $segmentInfo) {
             $segmentSizes[$segName] = $segmentInfo->count();
         }
 
-        $mergePool   = array();
+        $mergePool   = [];
         $poolSize    = 0;
         $sizeToMerge = $this->maxBufferedDocs;
         asort($segmentSizes, SORT_NUMERIC);
@@ -263,7 +263,7 @@ class Writer
                 if ($poolSize >= $sizeToMerge) {
                     return true;
                 }
-                $mergePool   = array();
+                $mergePool   = [];
                 $poolSize    = 0;
 
                 $sizeToMerge *= $this->mergeFactor;
@@ -293,7 +293,7 @@ class Writer
             return;
         }
 
-        if (!$this->_hasAnythingToMerge()) {
+        if (! $this->_hasAnythingToMerge()) {
             Lucene\LockManager::releaseOptimizationLock($this->_directory);
             return;
         }
@@ -311,12 +311,12 @@ class Writer
         $this->_updateSegments();
 
         // Perform standard auto-optimization procedure
-        $segmentSizes = array();
+        $segmentSizes = [];
         foreach ($this->_segmentInfos as $segName => $segmentInfo) {
             $segmentSizes[$segName] = $segmentInfo->count();
         }
 
-        $mergePool   = array();
+        $mergePool   = [];
         $poolSize    = 0;
         $sizeToMerge = $this->maxBufferedDocs;
         asort($segmentSizes, SORT_NUMERIC);
@@ -327,7 +327,7 @@ class Writer
                 if ($poolSize >= $sizeToMerge) {
                     $this->_mergeSegments($mergePool);
                 }
-                $mergePool   = array();
+                $mergePool   = [];
                 $poolSize    = 0;
 
                 $sizeToMerge *= $this->mergeFactor;
@@ -360,8 +360,10 @@ class Writer
     {
         $newName = $this->_newSegmentName();
 
-        $merger = new SegmentMerger($this->_directory,
-                                                             $newName);
+        $merger = new SegmentMerger(
+            $this->_directory,
+            $newName
+        );
         foreach ($segments as $segmentInfo) {
             $merger->addSource($segmentInfo);
             $this->_segmentsToDelete[$segmentInfo->getName()] = $segmentInfo->getName();
@@ -445,7 +447,7 @@ class Writer
             // Read number of segemnts
             $segmentsCount = $segmentsFile->readInt();
 
-            $segments = array();
+            $segments = [];
             for ($count = 0; $count < $segmentsCount; $count++) {
                 $segName = $segmentsFile->readString();
                 $segSize = $segmentsFile->readInt();
@@ -467,9 +469,9 @@ class Writer
                             $docStoreSegment        = $segmentsFile->readString();
                             $docStoreIsCompoundFile = $segmentsFile->readByte();
 
-                            $docStoreOptions = array('offset'     => $docStoreOffset,
+                            $docStoreOptions = ['offset'     => $docStoreOffset,
                                                      'segment'    => $docStoreSegment,
-                                                     'isCompound' => ($docStoreIsCompoundFile == 1));
+                                                     'isCompound' => ($docStoreIsCompoundFile == 1)];
                         } else {
                             $docStoreOptions = null;
                         }
@@ -480,7 +482,7 @@ class Writer
                     $hasSingleNormFile = $segmentsFile->readByte();
                     $numField          = $segmentsFile->readInt();
 
-                    $normGens = array();
+                    $normGens = [];
                     if ($numField != (int)0xFFFFFFFF) {
                         for ($count1 = 0; $count1 < $numField; $count1++) {
                             $normGens[] = $segmentsFile->readLong();
@@ -489,9 +491,9 @@ class Writer
                     $isCompoundByte    = $segmentsFile->readByte();
                 }
 
-                if (!in_array($segName, $this->_segmentsToDelete)) {
+                if (! in_array($segName, $this->_segmentsToDelete)) {
                     // Load segment if necessary
-                    if (!isset($this->_segmentInfos[$segName])) {
+                    if (! isset($this->_segmentInfos[$segName])) {
                         if ($isCompoundByte == 0xFF) {
                             // The segment is not a compound file
                             $isCompound = false;
@@ -504,13 +506,15 @@ class Writer
                         }
 
                         $this->_segmentInfos[$segName] =
-                                    new SegmentInfo($this->_directory,
-                                                                             $segName,
-                                                                             $segSize,
-                                                                             $delGen,
-                                                                             $docStoreOptions,
-                                                                             $hasSingleNormFile,
-                                                                             $isCompound);
+                                    new SegmentInfo(
+                                        $this->_directory,
+                                        $segName,
+                                        $segSize,
+                                        $delGen,
+                                        $docStoreOptions,
+                                        $hasSingleNormFile,
+                                        $isCompound
+                                    );
                     } else {
                         // Retrieve actual deletions file generation number
                         $delGen = $this->_segmentInfos[$segName]->getDelGen();
@@ -556,7 +560,8 @@ class Writer
                 $newSegmentFile->writeInt($segmentInfo->count());
 
                 // delete file generation: -1 (there is no delete file yet)
-                $newSegmentFile->writeInt((int)0xFFFFFFFF);$newSegmentFile->writeInt((int)0xFFFFFFFF);
+                $newSegmentFile->writeInt((int)0xFFFFFFFF);
+                $newSegmentFile->writeInt((int)0xFFFFFFFF);
                 if ($this->_targetFormatVersion == Lucene\Index::FORMAT_2_3) {
                     // docStoreOffset: -1 (segment doesn't use shared doc store)
                     $newSegmentFile->writeInt((int)0xFFFFFFFF);
@@ -571,7 +576,7 @@ class Writer
                 $segments[$segmentInfo->getName()] = $segmentInfo->count();
                 $this->_segmentInfos[$segName] = $segmentInfo;
             }
-            $this->_newSegments = array();
+            $this->_newSegments = [];
 
             $newSegmentFile->seek($numOfSegmentsOffset);
             $newSegmentFile->writeInt($segmentsCount);  // Update segments count
@@ -581,7 +586,8 @@ class Writer
             $generation--;
             $genFile->seek(4, SEEK_SET);
             // Write generation number twice
-            $genFile->writeLong($generation); $genFile->writeLong($generation);
+            $genFile->writeLong($generation);
+            $genFile->writeLong($generation);
 
             // Release index write lock
             Lucene\LockManager::releaseWriteLock($this->_directory);
@@ -600,14 +606,14 @@ class Writer
             /**
              * Clean-up directory
              */
-            $filesToDelete = array();
-            $filesTypes    = array();
-            $filesNumbers  = array();
+            $filesToDelete = [];
+            $filesTypes    = [];
+            $filesNumbers  = [];
 
             // list of .del files of currently used segments
             // each segment can have several generations of .del files
             // only last should not be deleted
-            $delFiles = array();
+            $delFiles = [];
 
             foreach ($this->_directory->fileList() as $file) {
                 if ($file == 'deletable') {
@@ -631,7 +637,7 @@ class Writer
                 } elseif (preg_match('/(^_([a-zA-Z0-9]+))\.f\d+$/i', $file, $matches)) {
                     // one of per segment files ('<segment_name>.f<decimal_number>')
                     // Check if it's not one of the segments in the current segments set
-                    if (!isset($segments[$matches[1]])) {
+                    if (! isset($segments[$matches[1]])) {
                         $filesToDelete[] = $file;
                         $filesTypes[]    = 3; // second group of files for deletions
                         $filesNumbers[]  = (int)base_convert($matches[2], 36, 10); // order by segment number
@@ -639,27 +645,27 @@ class Writer
                 } elseif (preg_match('/(^_([a-zA-Z0-9]+))(_([a-zA-Z0-9]+))\.del$/i', $file, $matches)) {
                     // one of per segment files ('<segment_name>_<del_generation>.del' where <segment_name> is '_<segment_number>')
                     // Check if it's not one of the segments in the current segments set
-                    if (!isset($segments[$matches[1]])) {
+                    if (! isset($segments[$matches[1]])) {
                         $filesToDelete[] = $file;
                         $filesTypes[]    = 3; // second group of files for deletions
                         $filesNumbers[]  = (int)base_convert($matches[2], 36, 10); // order by segment number
                     } else {
                         $segmentNumber = (int)base_convert($matches[2], 36, 10);
                         $delGeneration = (int)base_convert($matches[4], 36, 10);
-                        if (!isset($delFiles[$segmentNumber])) {
-                            $delFiles[$segmentNumber] = array();
+                        if (! isset($delFiles[$segmentNumber])) {
+                            $delFiles[$segmentNumber] = [];
                         }
                         $delFiles[$segmentNumber][$delGeneration] = $file;
                     }
-                } elseif (isset(self::$_indexExtensions[substr($file, strlen($file)-4)])) {
+                } elseif (isset(self::$_indexExtensions[substr($file, strlen($file) - 4)])) {
                     // one of per segment files ('<segment_name>.<ext>')
                     $segmentName = substr($file, 0, strlen($file) - 4);
                     // Check if it's not one of the segments in the current segments set
-                    if (!isset($segments[$segmentName])  &&
+                    if (! isset($segments[$segmentName])  &&
                         ($this->_currentSegment === null  ||  $this->_currentSegment->getName() != $segmentName)) {
                         $filesToDelete[] = $file;
                         $filesTypes[]    = 3; // second group of files for deletions
-                        $filesNumbers[]  = (int)base_convert(substr($file, 1 /* skip '_' */, strlen($file)-5), 36, 10); // order by segment number
+                        $filesNumbers[]  = (int)base_convert(substr($file, 1 /* skip '_' */, strlen($file) - 5), 36, 10); // order by segment number
                     }
                 }
             }
@@ -680,20 +686,28 @@ class Writer
                 foreach ($segmentDelFiles as $delGeneration => $file) {
                         $filesToDelete[] = $file;
                         $filesTypes[]    = 4; // third group of files for deletions
-                        $filesNumbers[]  = $segmentNumber*$maxGenNumber + $delGeneration; // order by <segment_number>,<del_generation> pair
+                        $filesNumbers[]  = $segmentNumber * $maxGenNumber + $delGeneration; // order by <segment_number>,<del_generation> pair
                 }
             }
 
             // Reorder files for deleting
-            array_multisort($filesTypes,    SORT_ASC, SORT_NUMERIC,
-                            $filesNumbers,  SORT_ASC, SORT_NUMERIC,
-                            $filesToDelete, SORT_ASC, SORT_STRING);
+            array_multisort(
+                $filesTypes,
+                SORT_ASC,
+                SORT_NUMERIC,
+                $filesNumbers,
+                SORT_ASC,
+                SORT_NUMERIC,
+                $filesToDelete,
+                SORT_ASC,
+                SORT_STRING
+            );
 
             foreach ($filesToDelete as $file) {
                 try {
                     /** Skip shared docstore segments deleting */
                     /** @todo Process '.cfx' files to check if them are already unused */
-                    if (substr($file, strlen($file)-4) != '.cfx') {
+                    if (substr($file, strlen($file) - 4) != '.cfx') {
                         $this->_directory->deleteFile($file);
                     }
                 } catch (ExceptionInterface $e) {
@@ -717,7 +731,7 @@ class Writer
         }
 
         // Clean-up _segmentsToDelete container
-        $this->_segmentsToDelete = array();
+        $this->_segmentsToDelete = [];
 
 
         // Release index write lock
@@ -725,7 +739,7 @@ class Writer
 
         // Remove unused segments from segments list
         foreach ($this->_segmentInfos as $segName => $segmentInfo) {
-            if (!isset($segments[$segName])) {
+            if (! isset($segments[$segName])) {
                 unset($this->_segmentInfos[$segName]);
             }
         }

@@ -41,6 +41,5 @@ class DocsFilter
      *
      * @var array
      */
-    public $segmentFilters = array();
+    public $segmentFilters = [];
 }
-

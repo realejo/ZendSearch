@@ -95,7 +95,7 @@ class QueryHit
      */
     public function getDocument()
     {
-        if (!$this->_document instanceof Document) {
+        if (! $this->_document instanceof Document) {
             $this->_document = $this->_index->getDocument($this->document_id);
         }
 

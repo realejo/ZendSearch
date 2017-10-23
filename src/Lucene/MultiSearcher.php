@@ -38,12 +38,12 @@ class MultiSearcher implements SearchIndexInterface
      * @param array $indices   Arrays of indices for search
      * @throws \ZendSearch\Lucene\Exception\InvalidArgumentException
      */
-    public function __construct($indices = array())
+    public function __construct($indices = [])
     {
         $this->_indices = $indices;
 
         foreach ($this->_indices as $index) {
-            if (!$index instanceof SearchIndexInterface) {
+            if (! $index instanceof SearchIndexInterface) {
                 throw new InvalidArgumentException('sub-index objects have to implement ZendSearch\Lucene\Interface.');
             }
         }
@@ -171,7 +171,7 @@ class MultiSearcher implements SearchIndexInterface
      *
      * @param integer $id
      * @return boolean
-     * @throws \ZendSearch\Lucene\Exception\OutOfRangeException	is thrown if $id is out of the range
+     * @throws \ZendSearch\Lucene\Exception\OutOfRangeException is thrown if $id is out of the range
      */
     public function isDeleted($id)
     {
@@ -352,10 +352,10 @@ class MultiSearcher implements SearchIndexInterface
     public function find($query)
     {
         if (count($this->_indices) == 0) {
-            return array();
+            return [];
         }
 
-        $hitsList = array();
+        $hitsList = [];
 
         $indexShift = 0;
         foreach ($this->_indices as $index) {
@@ -384,7 +384,7 @@ class MultiSearcher implements SearchIndexInterface
      */
     public function getFieldNames($indexed = false)
     {
-        $fieldNamesList = array();
+        $fieldNamesList = [];
 
         foreach ($this->_indices as $index) {
             $fieldNamesList[] = $index->getFieldNames($indexed);
@@ -399,7 +399,7 @@ class MultiSearcher implements SearchIndexInterface
      *
      * @param integer|\ZendSearch\Lucene\Search\QueryHit $id
      * @return \ZendSearch\Lucene\Document
-     * @throws \ZendSearch\Lucene\Exception\OutOfRangeException	is thrown if $id is out of the range
+     * @throws \ZendSearch\Lucene\Exception\OutOfRangeException is thrown if $id is out of the range
      */
     public function getDocument($id)
     {
@@ -454,7 +454,7 @@ class MultiSearcher implements SearchIndexInterface
             throw new InvalidArgumentException('Document filters could not used with multi-searcher');
         }
 
-        $docsList = array();
+        $docsList = [];
 
         $indexShift = 0;
         foreach ($this->_indices as $index) {
@@ -504,14 +504,14 @@ class MultiSearcher implements SearchIndexInterface
             throw new InvalidArgumentException('Document filters could not used with multi-searcher');
         }
 
-        $freqsList = array();
+        $freqsList = [];
 
         $indexShift = 0;
         foreach ($this->_indices as $index) {
             $freqs = $index->termFreqs($term);
 
             if ($indexShift != 0) {
-                $freqsShifted = array();
+                $freqsShifted = [];
 
                 foreach ($freqs as $docId => $freq) {
                     $freqsShifted[$docId + $indexShift] = $freq;
@@ -541,14 +541,14 @@ class MultiSearcher implements SearchIndexInterface
             throw new InvalidArgumentException('Document filters could not used with multi-searcher');
         }
 
-        $termPositionsList = array();
+        $termPositionsList = [];
 
         $indexShift = 0;
         foreach ($this->_indices as $index) {
             $termPositions = $index->termPositions($term);
 
             if ($indexShift != 0) {
-                $termPositionsShifted = array();
+                $termPositionsShifted = [];
 
                 foreach ($termPositions as $docId => $positions) {
                     $termPositions[$docId + $indexShift] = $positions;
@@ -685,7 +685,7 @@ class MultiSearcher implements SearchIndexInterface
      */
     public function setDocumentDistributorCallback($callback)
     {
-        if ($callback !== null  &&  !is_callable($callback)) {
+        if ($callback !== null  &&  ! is_callable($callback)) {
             throw new InvalidArgumentException('$callback parameter must be a valid callback.');
         }
 
@@ -747,7 +747,7 @@ class MultiSearcher implements SearchIndexInterface
      */
     public function terms()
     {
-        $termsList = array();
+        $termsList = [];
 
         foreach ($this->_indices as $index) {
             $termsList[] = $index->terms();
