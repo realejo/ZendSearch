@@ -4,23 +4,17 @@
     "type": "library",
     "license": "BSD-3-Clause",
     "keywords": [
-        "zf2",
+        "zf2","zf3",
         "lucene"
     ],
     "homepage": "http://packages.zendframework.com/",
     "autoload": {
-        "psr-0": {
-            "ZendSearch": "library/"
+        "psr-4": {
+            "Zend\\Search\\": "src/"
         }
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "http://packages.zendframework.com/"
-        }
-    ],
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zend-stdlib": "2.*"
+        "zendframework/zend-stdlib": "3.*"
     }
 }
