@@ -19,7 +19,7 @@
     },
     "require-dev": {
         "phpunit/PHPUnit": "~4.0",
-        "squizlabs/php_codesniffer": "^2.6.2"
+        "squizlabs/php_codesniffer": "^2.6.2 || ^3.0.0"
     },
     "scripts": {
         "cs-check": "phpcs --colors",
